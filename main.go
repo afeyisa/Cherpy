@@ -12,12 +12,12 @@ import (
 
 
 func main()  {
-
+http.Server
 	//another way of starting server
-	mux := http.NewServeMux()
-	mux.HandleFunc("/",getRoot)
-
-	err1 := http.ListenAndServe(":8080",mux)
+	// mux := http.NewServeMux()
+	// mux.HandleFunc("/",getRoot)
+	
+	err1 := http.ListenAndServe(":8080",http.FileServer(http.Dir("./")))
 
 	if errors.Is(err1, http.ErrServerClosed){
 		fmt.Printf("Server closed\n")
