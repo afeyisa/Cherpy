@@ -12,7 +12,6 @@ import (
 
 
 func main()  {
-http.Server
 	//another way of starting server
 	// mux := http.NewServeMux()
 	// mux.HandleFunc("/",getRoot)
