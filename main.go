@@ -1,13 +1,17 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"sync/atomic"
+	"time"
+	"github.com/afeyisa/Cherpy/api"
 )
 
 
@@ -31,6 +35,7 @@ func main()  {
 
 	mux.HandleFunc("/healthz",isHealth)	
 	mux.HandleFunc("/rf",getNumberOfReq)
+	mux.HandleFunc("POST /api/validate",api.ValidateChirp)
 	mux.Handle("/",	x.middlewareMetricsInc(http.FileServer(http.Dir("./"))))
 
 	
@@ -66,3 +71,55 @@ func getNumberOfReq(w http.ResponseWriter,r *http.Request){
 	w.Write([]byte(strconv.Itoa(int(x.fileserverHits.Load()))))
 
 }
+
+
+
+
+// for Json phase
+/*****************************************************************/
+
+// json file decoder
+func decodeHandler (w http.ResponseWriter,r * http.Request){
+	type parameters struct {
+		Name string `json:"name"`
+		Age int `json:"age"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	prams := parameters{}
+
+	err := decoder.Decode(&prams)
+
+	if err != nil {
+		log.Printf("error decoding parameteres %s",err)
+		w.WriteHeader(500)
+		return
+	}
+
+	// now params can be used
+}
+
+
+// json encoder
+func encodeHandler ( w http.ResponseWriter, r *http.Request){
+	type returnVals struct{
+		CreatedAt time.Time `json:"created_at"`
+		ID int `json:"id"`
+	}
+	resPBody := returnVals{
+		CreatedAt:time.Now() ,
+		ID: 22,
+	}
+	data , err := json.Marshal(resPBody)
+	if err != nil {
+		log.Printf("erro marshalling JSON %s",err)
+		w.WriteHeader(500)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write(data)
+}
+
+/*************************************************/
